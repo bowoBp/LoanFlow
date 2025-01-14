@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"github.com/bowoBp/LoanFlow/pkg/api"
+	"log"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	app := api.Default()
+	err := app.Start()
+	if err != nil {
+		log.Print(err)
+		panic(err)
+	}
 }
