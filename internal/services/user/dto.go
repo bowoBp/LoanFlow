@@ -10,6 +10,9 @@ type (
 		ID        string    `json:"id"`
 		UserName  string    `validate:"required" json:"userName"`
 		Password  string    `validate:"required" json:"password"`
+		Email     string    `validate:"required" json:"email"`
+		Phone     string    `validate:"required" json:"phone"`
+		Role      string    `validate:"required" json:"role"`
 		CreatedAt time.Time `json:"createdAt"`
 	}
 
@@ -30,7 +33,7 @@ type (
 	}
 
 	LoginParam struct {
-		UserName string `json:"userName"`
-		Password string `json:"password"`
+		Email    string `validate:"required" json:"email"`
+		Password string `validate:"required" json:"password"`
 	}
 )

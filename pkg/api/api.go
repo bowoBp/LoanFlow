@@ -17,7 +17,7 @@ type (
 )
 
 func (a Api) Start() error {
-	root := a.server.Group("/")
+	root := a.server.Group("/api/v1/")
 	for _, router := range a.routers {
 		router.Route(root)
 	}

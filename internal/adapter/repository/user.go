@@ -21,7 +21,7 @@ type (
 			ctx context.Context,
 		) ([]domians.User, error)
 
-		LoginUser(
+		CheckEmail(
 			ctx context.Context,
 			userName string,
 		) (*domians.User, error)
@@ -51,15 +51,15 @@ func (repo UserRepo) GetAllUser(
 	return cust, err
 }
 
-func (repo UserRepo) LoginUser(
+func (repo UserRepo) CheckEmail(
 	ctx context.Context,
-	userName string,
+	email string,
 ) (*domians.User, error) {
 	customer := &domians.User{}
 
 	err := repo.db.WithContext(ctx).
 		Model(&domians.User{}).
-		Where("user_name = ? ", userName).
+		Where("email = ? ", email).
 		First(customer).
 		Error
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bowoBp/LoanFlow/internal/dto"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -41,7 +42,6 @@ func (ctrl Controller) Register(
 	start := time.Now()
 	result, err := ctrl.Uc.RegisterUser(ctx, payload)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	return dto.NewSuccessResponse(
@@ -64,8 +64,8 @@ func (ctrl Controller) GetAll(
 
 	for _, user := range users {
 		res = append(res, Users{
-			ID:        user.ID,
-			UserName:  user.UserName,
+			ID:        strconv.Itoa(int(user.ID)),
+			UserName:  user.Name,
 			CreatedAt: user.CreatedAt,
 		})
 	}
@@ -111,9 +111,9 @@ func (ctrl Controller) GetCurrent(
 
 func (ctrl Controller) Login(
 	ctx context.Context,
-	userName, password string,
+	email, password string,
 ) (SuccessLoginUser, error) {
-	user, tokenString, err := ctrl.Uc.LoginUser(ctx, userName, password)
+	user, tokenString, err := ctrl.Uc.LoginUser(ctx, email, password)
 	if err != nil {
 		return SuccessLoginUser{}, err
 	}
@@ -124,7 +124,7 @@ func (ctrl Controller) Login(
 			Message:      "success",
 			ResponseTime: "",
 		},
-		UserName:    user.UserName,
+		UserName:    user.Name,
 		AccessToken: tokenString,
 	}
 

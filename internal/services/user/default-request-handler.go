@@ -1,8 +1,8 @@
 package user
 
 import (
+	"github.com/bowoBp/LoanFlow/internal/constant"
 	"github.com/bowoBp/LoanFlow/internal/dto"
-	"github.com/bowoBp/LoanFlow/utils/constant"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -16,6 +16,8 @@ type (
 func (rh RequestHandler) Register(ctx *gin.Context) {
 	var payload = RegisterUser{}
 	err := ctx.Bind(&payload)
+	role := ctx.GetHeader("X-User-Role")
+	payload.Role = role
 	if payload.Password == "" || payload.UserName == "" {
 		ctx.JSON(http.StatusBadRequest, dto.DefaultErrorInvalidDataWithMessage(constant.ErrRegister.Error()))
 		return
@@ -61,7 +63,7 @@ func (rh RequestHandler) LoginCustomer(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, dto.DefaultErrorInvalidDataWithMessage(err.Error()))
 		return
 	}
-	res, err := rh.ctrl.Login(ctx, payload.UserName, payload.Password)
+	res, err := rh.ctrl.Login(ctx, payload.Email, payload.Password)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.DefaultErrorResponseWithMessage(err.Error()))
 	}
