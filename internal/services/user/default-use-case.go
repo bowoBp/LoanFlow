@@ -2,9 +2,11 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"github.com/bowoBp/LoanFlow/internal/adapter/Repository"
 	"github.com/bowoBp/LoanFlow/internal/constant"
 	"github.com/bowoBp/LoanFlow/internal/domain"
+	"github.com/bowoBp/LoanFlow/pkg/environment"
 	"github.com/bowoBp/LoanFlow/utils/helper"
 	"strconv"
 	"time"
@@ -15,6 +17,7 @@ type (
 		userRepo Repository.UserRepoInterface
 		jwt      helper.JwtInterface
 		bcrypt   helper.BcryptInterface
+		env      environment.Environment
 	}
 
 	UsecaseInterface interface {
@@ -29,8 +32,8 @@ type (
 
 		LoginUser(
 			ctx context.Context,
-			userName, password string,
-		) (*domians.User, string, error)
+			email, password string,
+		) (*domians.User, string, string, error)
 	}
 )
 
@@ -78,24 +81,83 @@ func (uc UsaCase) GetAll(
 func (uc UsaCase) LoginUser(
 	ctx context.Context,
 	email, password string,
-) (*domians.User, string, error) {
+) (*domians.User, string, string, error) {
 	user, err := uc.userRepo.CheckEmail(ctx, email)
 	if err != nil {
-		return nil, "", err
+		return nil, "", "", err
 	}
 
 	// verify hashed password
 	comparePass := uc.bcrypt.ComparePass([]byte(user.PasswordHash), []byte(password))
 	if !comparePass {
-		return nil, "", err
+		return nil, "", "", err
 	}
 
 	//Generate token JWT
 	tokenString, errToken := uc.jwt.GenerateToken(user.ID, user.Role, user.Name, user.CreatedAt)
 	if errToken != nil {
-		return nil, "", err
+		return nil, "", "", err
 	}
 
-	return user, tokenString, nil
+	//Generate refresh token
+	refreshToken, err := uc._generateRefreshToken(user.ID, ctx)
 
+	return user, tokenString, refreshToken, nil
+
+}
+
+func (uc UsaCase) _generateRefreshToken(
+	id uint,
+	ctx context.Context,
+) (string, error) {
+	// Periksa apakah refresh token sudah ada
+	existingRefreshToken, err := uc.userRepo.CheckRefreshToken(ctx, id)
+	if err != nil {
+		return "", err // Error dari query ke database
+	}
+
+	// Generate nilai refresh token baru
+	refresh, err := uc.bcrypt.GenerateHashValue(
+		uc.env.Get("DEFAULT_SECRET_FORGET_PASSWORD"),
+		fmt.Sprintf("%d", id),
+		17,
+	)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate refresh token hash: %w", err)
+	}
+
+	// Set waktu kedaluwarsa
+	expireAt := time.Now().Add(7 * 24 * time.Hour)
+
+	// Jika refresh token sudah ada, update
+	if existingRefreshToken != nil {
+		existingRefreshToken.RefreshToken = refresh
+		existingRefreshToken.ExpiresAt = expireAt
+		existingRefreshToken.UpdatedAt = time.Now()
+
+		// Update refresh token di database
+		err = uc.userRepo.UpdateRefreshToken(ctx, existingRefreshToken)
+		if err != nil {
+			return "", fmt.Errorf("failed to update refresh token: %w", err)
+		}
+
+		return existingRefreshToken.RefreshToken, nil
+	}
+
+	// Jika tidak ada, buat refresh token baru
+	newRefreshToken := &domians.RefreshToken{
+		UserID:       id,
+		RefreshToken: refresh,
+		ExpiresAt:    expireAt,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+
+	// Simpan refresh token baru ke database
+	_, err = uc.userRepo.StoreRefreshToken(ctx, newRefreshToken)
+	if err != nil {
+		return "", fmt.Errorf("failed to store refresh token: %w", err)
+	}
+
+	return newRefreshToken.RefreshToken, nil
 }

@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/bowoBp/LoanFlow/internal/adapter/Repository"
+	"github.com/bowoBp/LoanFlow/pkg/environment"
 	"github.com/bowoBp/LoanFlow/pkg/middleware"
 	"github.com/bowoBp/LoanFlow/utils/helper"
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 type (
 	Router struct {
 		rq   *RequestHandler
-		auth middleware.Auth
+		auth middleware.AuthInterface
 	}
 )
 
@@ -19,16 +20,21 @@ func NewRoute(
 	db *gorm.DB,
 	jwt helper.JwtInterface,
 	bcrypt helper.BcryptInterface,
+	env environment.Environment,
+	auth middleware.AuthInterface,
 ) *Router {
-	return &Router{rq: &RequestHandler{
-		ctrl: &Controller{
-			Uc: UsaCase{
-				userRepo: Repository.NewUserRepo(db),
-				jwt:      jwt,
-				bcrypt:   bcrypt,
+	return &Router{
+		rq: &RequestHandler{
+			ctrl: &Controller{
+				Uc: UsaCase{
+					userRepo: Repository.NewUserRepo(db),
+					jwt:      jwt,
+					bcrypt:   bcrypt,
+					env:      env,
+				},
 			},
 		},
-	},
+		auth: auth,
 	}
 
 }
@@ -54,7 +60,7 @@ func (r Router) Route(router *gin.RouterGroup) {
 
 	auth.POST(
 		"/login",
-		r.rq.LoginCustomer,
+		r.rq.Login,
 	)
 
 }

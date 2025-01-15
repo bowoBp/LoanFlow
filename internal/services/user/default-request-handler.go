@@ -56,7 +56,7 @@ func (rh RequestHandler) GetCurrent(ctx *gin.Context) {
 
 }
 
-func (rh RequestHandler) LoginCustomer(ctx *gin.Context) {
+func (rh RequestHandler) Login(ctx *gin.Context) {
 	var payload = LoginParam{}
 	err := ctx.Bind(&payload)
 	if err != nil {

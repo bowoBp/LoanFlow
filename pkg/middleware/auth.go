@@ -11,11 +11,18 @@ import (
 )
 
 type Auth struct {
-	jwt helper.Jwt
+	jwt helper.JwtInterface
 }
 
 type AuthInterface interface {
 	Authentication() gin.HandlerFunc
+	Authorize(roles ...string) gin.HandlerFunc
+}
+
+func NewAuth() AuthInterface {
+	return &Auth{
+		jwt: helper.NewJwt(),
+	}
 }
 
 func (receiver Auth) Authentication() gin.HandlerFunc {

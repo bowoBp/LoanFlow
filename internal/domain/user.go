@@ -26,4 +26,16 @@ type (
 		// Jika user (role=INVESTOR)
 		LoanInvestors []LoanInvestor `gorm:"foreignKey:InvestorID;references:ID" json:"loan_investors,omitempty"`
 	}
+
+	RefreshToken struct {
+		ID           uint      `gorm:"primaryKey;column:id" json:"id"`                            // Primary key
+		UserID       uint      `gorm:"not null;column:user_id;index" json:"user_id"`              // FK to users.id
+		RefreshToken string    `gorm:"not null;unique;column:refresh_token" json:"refresh_token"` // Unique refresh token
+		ExpiresAt    time.Time `gorm:"not null;column:expires_at" json:"expires_at"`              // Expiry time of the token
+		CreatedAt    time.Time `gorm:"autoCreateTime;column:created_at" json:"created_at"`        // Time when the token was created
+		UpdatedAt    time.Time `gorm:"autoUpdateTime;column:updated_at" json:"updated_at"`        // Time when the token was last updated
+
+		// Relation with the User model
+		User User `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
+	}
 )

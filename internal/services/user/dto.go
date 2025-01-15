@@ -21,9 +21,10 @@ type (
 	}
 
 	SuccessLoginUser struct {
-		Response    dto.ResponseMeta
-		UserName    string `json:"userName"`
-		AccessToken string `json:"accessToken"`
+		Response     dto.ResponseMeta
+		UserName     string `json:"userName"`
+		AccessToken  string `json:"accessToken"`
+		RefreshToken string `json:"refreshToken"`
 	}
 
 	Users struct {

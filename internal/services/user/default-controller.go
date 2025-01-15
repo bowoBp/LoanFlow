@@ -113,7 +113,7 @@ func (ctrl Controller) Login(
 	ctx context.Context,
 	email, password string,
 ) (SuccessLoginUser, error) {
-	user, tokenString, err := ctrl.Uc.LoginUser(ctx, email, password)
+	user, tokenString, refreshToken, err := ctrl.Uc.LoginUser(ctx, email, password)
 	if err != nil {
 		return SuccessLoginUser{}, err
 	}
@@ -124,8 +124,9 @@ func (ctrl Controller) Login(
 			Message:      "success",
 			ResponseTime: "",
 		},
-		UserName:    user.Name,
-		AccessToken: tokenString,
+		UserName:     user.Name,
+		AccessToken:  tokenString,
+		RefreshToken: refreshToken,
 	}
 
 	return response, nil
