@@ -32,6 +32,18 @@ type (
 			ctx context.Context,
 			userName, password string,
 		) (SuccessLoginUser, error)
+
+		RefreshToken(
+			ctx context.Context,
+			id uint,
+			createdAt time.Time,
+			token, role, name string,
+		) (SuccessLoginUser, error)
+
+		RevokeToken(
+			ctx context.Context,
+			id uint,
+		) (*dto.Response, error)
 	}
 )
 
@@ -130,4 +142,46 @@ func (ctrl Controller) Login(
 	}
 
 	return response, nil
+}
+
+func (ctrl Controller) RefreshToken(
+	ctx context.Context,
+	id uint,
+	createdAt time.Time,
+	token, role, name string,
+) (SuccessLoginUser, error) {
+
+	tokenString, refreshToken, err := ctrl.Uc.RefreshToken(ctx, id, createdAt, token, role, name)
+	if err != nil {
+		return SuccessLoginUser{}, err
+	}
+	response := SuccessLoginUser{
+		Response: dto.ResponseMeta{
+			Success:      true,
+			MessageTitle: "login successful",
+			Message:      "success",
+			ResponseTime: "",
+		},
+		UserName:     name,
+		AccessToken:  tokenString,
+		RefreshToken: refreshToken,
+	}
+
+	return response, nil
+}
+
+func (ctrl Controller) RevokeToken(
+	ctx context.Context,
+	id uint,
+) (*dto.Response, error) {
+	start := time.Now()
+	err := ctrl.Uc.RevokeToken(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return dto.NewSuccessResponse(
+		nil,
+		"Logout successful",
+		fmt.Sprint(time.Since(start).Milliseconds(), " ms."),
+	), nil
 }

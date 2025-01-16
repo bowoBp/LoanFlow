@@ -40,6 +40,10 @@ type (
 		UpdateRefreshToken(
 			ctx context.Context,
 			token *domians.RefreshToken) error
+
+		DeleteRefreshTokenByUserID(
+			ctx context.Context,
+			userID uint) error
 	}
 )
 
@@ -115,4 +119,12 @@ func (repo UserRepo) UpdateRefreshToken(
 	ctx context.Context,
 	token *domians.RefreshToken) error {
 	return repo.db.WithContext(ctx).Save(token).Error
+}
+
+func (repo UserRepo) DeleteRefreshTokenByUserID(
+	ctx context.Context,
+	userID uint) error {
+	return repo.db.WithContext(ctx).
+		Where("user_id = ?", userID).
+		Delete(&domians.RefreshToken{}).Error
 }

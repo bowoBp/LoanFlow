@@ -63,4 +63,16 @@ func (r Router) Route(router *gin.RouterGroup) {
 		r.rq.Login,
 	)
 
+	auth.POST(
+		"/refresh-token",
+		r.auth.Authentication(),
+		r.rq.RefreshToken,
+	)
+
+	auth.POST(
+		"/logout",
+		r.auth.Authentication(),
+		r.rq.Logout,
+	)
+
 }

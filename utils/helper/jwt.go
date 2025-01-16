@@ -17,7 +17,7 @@ type Jwt struct {
 }
 
 type JwtPayload struct {
-	ID        string
+	ID        uint
 	UserName  string
 	UserRole  string
 	CreatedAt time.Time

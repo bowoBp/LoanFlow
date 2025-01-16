@@ -34,6 +34,18 @@ type (
 			ctx context.Context,
 			email, password string,
 		) (*domians.User, string, string, error)
+
+		RefreshToken(
+			ctx context.Context,
+			id uint,
+			createdAt time.Time,
+			token, role, name string,
+		) (string, string, error)
+
+		RevokeToken(
+			ctx context.Context,
+			id uint,
+		) error
 	}
 )
 
@@ -106,6 +118,26 @@ func (uc UsaCase) LoginUser(
 
 }
 
+func (uc UsaCase) RefreshToken(
+	ctx context.Context,
+	id uint,
+	createdAt time.Time,
+	token, role, name string,
+) (string, string, error) {
+
+	//Generate token JWT
+	tokenString, err := uc.jwt.GenerateToken(id, role, name, createdAt)
+	if err != nil {
+		return "", "", err
+	}
+
+	//Generate refresh token
+	refreshToken, err := uc._generateRefreshToken(id, ctx)
+
+	return tokenString, refreshToken, nil
+
+}
+
 func (uc UsaCase) _generateRefreshToken(
 	id uint,
 	ctx context.Context,
@@ -160,4 +192,11 @@ func (uc UsaCase) _generateRefreshToken(
 	}
 
 	return newRefreshToken.RefreshToken, nil
+}
+
+func (uc UsaCase) RevokeToken(
+	ctx context.Context,
+	id uint,
+) error {
+	return uc.userRepo.DeleteRefreshTokenByUserID(ctx, id)
 }

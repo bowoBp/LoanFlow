@@ -37,4 +37,8 @@ type (
 		Email    string `validate:"required" json:"email"`
 		Password string `validate:"required" json:"password"`
 	}
+
+	RefreshTokenParam struct {
+		RefreshToken string `json:"refreshToken"`
+	}
 )
