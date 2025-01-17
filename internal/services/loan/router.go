@@ -1,9 +1,11 @@
 package loan
 
 import (
+	Repository "github.com/bowoBp/LoanFlow/internal/adapter/repository"
 	"github.com/bowoBp/LoanFlow/internal/constant"
 	"github.com/bowoBp/LoanFlow/pkg/middleware"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 )
@@ -11,15 +13,24 @@ import (
 type (
 	Router struct {
 		auth middleware.AuthInterface
+		rh   *RequestHandler
 	}
 )
 
 func NewRoute(
+	db *gorm.DB,
 	auth middleware.AuthInterface,
 ) *Router {
-
 	return &Router{
 		auth: auth,
+		rh: &RequestHandler{
+			ctrl: &Controller{
+				Uc: UseCase{
+					loanRepo:      Repository.NewLoanRepo(db),
+					dbTransaction: NewLoanTransaction(db),
+				},
+			},
+		},
 	}
 }
 
@@ -45,7 +56,7 @@ func (r Router) Route(router *gin.RouterGroup) {
 			constant.RoleStaff,
 			constant.RoleInvestor,
 		),
-		notImplementedHandler,
+		r.rh.GetLoans,
 	)
 	loans.POST(
 		"/",
@@ -54,7 +65,7 @@ func (r Router) Route(router *gin.RouterGroup) {
 			constant.RoleAdmin,
 			constant.RoleBorrower,
 		),
-		notImplementedHandler,
+		r.rh.CreateLoan,
 	)
 	loans.POST(
 		"/:loanId/approve",
@@ -63,7 +74,7 @@ func (r Router) Route(router *gin.RouterGroup) {
 			constant.RoleAdmin,
 			constant.RoleStaff,
 		),
-		notImplementedHandler,
+		r.rh.ApproveLoan,
 	)
 	loans.POST(
 		"/:loanId/invest",
@@ -71,7 +82,7 @@ func (r Router) Route(router *gin.RouterGroup) {
 		r.auth.Authorize(
 			constant.RoleInvestor,
 		),
-		notImplementedHandler,
+		r.rh.StoreInvest,
 	)
 	loans.POST(
 		"/:loanId/disburse",
@@ -80,7 +91,7 @@ func (r Router) Route(router *gin.RouterGroup) {
 			constant.RoleAdmin,
 			constant.RoleStaff,
 		),
-		notImplementedHandler,
+		r.rh.DisburseLoan,
 	)
 	loans.GET(
 		"/:loanId",
@@ -91,6 +102,6 @@ func (r Router) Route(router *gin.RouterGroup) {
 			constant.RoleStaff,
 			constant.RoleInvestor,
 		),
-		notImplementedHandler,
+		r.rh.GetLoan,
 	)
 }

@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
-	"github.com/bowoBp/LoanFlow/internal/adapter/Repository"
+	"github.com/bowoBp/LoanFlow/internal/adapter/repository"
 	"github.com/bowoBp/LoanFlow/internal/constant"
 	"github.com/bowoBp/LoanFlow/internal/domain"
 	"github.com/bowoBp/LoanFlow/pkg/environment"

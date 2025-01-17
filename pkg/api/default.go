@@ -26,7 +26,7 @@ func Default() *Api {
 	fmt.Println("database connected: 3036")
 	var routers = []Router{
 		user.NewRoute(sqlConn, jwt, bcrypt, env, auth),
-		loan.NewRoute(auth),
+		loan.NewRoute(sqlConn, auth),
 	}
 	return &Api{
 		server:  server,

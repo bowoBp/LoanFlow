@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/bowoBp/LoanFlow/internal/adapter/Repository"
+	"github.com/bowoBp/LoanFlow/internal/adapter/repository"
 	"github.com/bowoBp/LoanFlow/pkg/environment"
 	"github.com/bowoBp/LoanFlow/pkg/middleware"
 	"github.com/bowoBp/LoanFlow/utils/helper"

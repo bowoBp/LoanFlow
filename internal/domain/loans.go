@@ -65,4 +65,14 @@ type (
 		// Relation back to Staff (User)
 		Staff User `gorm:"foreignKey:StaffID" json:"staff,omitempty"`
 	}
+
+	LoanStateHistory struct {
+		ID            uint      `gorm:"primaryKey;column:id" json:"id"`
+		LoanID        uint      `gorm:"column:loan_id" json:"loan_id"`
+		PreviousState string    `gorm:"column:previous_state" json:"previous_state"`
+		NewState      string    `gorm:"column:new_state" json:"new_state"`
+		ActionBy      uint      `gorm:"column:action_by" json:"action_by"`
+		ActionAt      time.Time `gorm:"autoCreateTime;column:action_at" json:"action_at"`
+		Remarks       string    `gorm:"column:remarks" json:"remarks"`
+	}
 )
