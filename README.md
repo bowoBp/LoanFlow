@@ -3,7 +3,7 @@
 
 
 ## Assessment Golang Developer ##
-here is my previous mini project called "gi-assignment".
+here is my previous mini project called "Loan-Flow".
 ## Setup
 1. Install Go version 1.20
 2. Use GoLand (recommended) or any IDE like Visual Studio Code
@@ -16,10 +16,16 @@ here is my previous mini project called "gi-assignment".
 go run cmd/api/main.go
 ```
 8. To use the API, please import this collection json to your Postman to test the API
-   -> [CLICK HERE TO DOWNLOAD COLLECTION](https://drive.google.com/file/d/1PAUgpEyorzoYFGOjLnyz_YTEEkBxFWgr/view?usp=drive_link) <-
+   -> [CLICK HERE TO DOWNLOAD COLLECTION](https://drive.google.com/file/d/128zim6kZddnn4Cd4XdBsZXXzJ36xBM10/view?usp=sharing) <-
 
 ---
+### High Level Business flow ###
+![img_2.png](img_2.png)
+---
+### Database Design ###
+![img_1.png](img_1.png)
 
+---
 ### Architecture and Design ###
 this service using onion architecture, there are 5 layers
 from inner to outer which are entity, repository, use case,
@@ -42,3 +48,5 @@ each layer are follow:
 5. **Request handler**: This layer is responsible for handling
    the incoming HTTP requests and passing them on to
    the controller layer.
+### Architecture Diagram ###
+![img.png](img.png)
