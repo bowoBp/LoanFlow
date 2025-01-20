@@ -25,9 +25,9 @@ func NewRoute(
 		auth: auth,
 		rh: &RequestHandler{
 			ctrl: &Controller{
-				Uc: UseCase{
-					loanRepo:      Repository.NewLoanRepo(db),
-					dbTransaction: NewLoanTransaction(db),
+				Uc: Usecase{
+					LoanRepo:      Repository.NewLoanRepo(db),
+					DbTransaction: NewLoanTransaction(db),
 				},
 			},
 		},

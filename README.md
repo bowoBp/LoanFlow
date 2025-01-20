@@ -5,17 +5,19 @@
 ## Assessment Golang Developer ##
 here is my previous mini project called "Loan-Flow".
 ## Setup
-1. Install Go version 1.20
+1. Install Go version 1.23
 2. Use GoLand (recommended) or any IDE like Visual Studio Code
-4. Download dependencies with command `go mod tidy and go vendor`
-5. Run docker compose with command `docker-compose up -d`
-6. Run Migration for create table into database with `make migrate-up`
+3. Download dependencies with command `go mod tidy and go vendor`
+4. Run docker compose with command `docker-compose up -d`
+5. Run Migration for create table into database with `make migrate_up`
+6. Create mocks for create mock using mockery `make create_mocks`
+7. Run test case `make run_test`
 
-7. Run this command to run API app from root directory:
+8. Run this command to run API app from root directory:
 ```shell
 go run cmd/api/main.go
 ```
-8. To use the API, please import this collection json to your Postman to test the API
+9. To use the API, please import this collection json to your Postman to test the API
    -> [CLICK HERE TO DOWNLOAD COLLECTION](https://drive.google.com/file/d/128zim6kZddnn4Cd4XdBsZXXzJ36xBM10/view?usp=sharing) <-
 
 ---

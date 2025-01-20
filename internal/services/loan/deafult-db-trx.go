@@ -14,7 +14,8 @@ type (
 	}
 
 	DefaultLoanTransactionInterface interface {
-		Repository.TransactionEnder
+		Begin() (DefaultLoanTransactionInterface, error)
+		End(err error) error
 		CreateLoan(
 			ctx context.Context,
 			loan *domians.Loan,

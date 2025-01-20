@@ -10,9 +10,9 @@ import (
 )
 
 type (
-	UseCase struct {
-		loanRepo      Repository.LoanRepoInterface
-		dbTransaction Repository.TransactionUnit[DefaultLoanTransactionInterface]
+	Usecase struct {
+		LoanRepo      Repository.LoanRepoInterface
+		DbTransaction Repository.TransactionUnit[DefaultLoanTransactionInterface]
 	}
 
 	UsecaseInterface interface {
@@ -47,11 +47,11 @@ type (
 	}
 )
 
-func (uc UseCase) CreateLoan(
+func (uc Usecase) CreateLoan(
 	ctx context.Context,
 	payload CreateLoanRequest,
 ) error {
-	dbTrx, err := uc.dbTransaction.Begin()
+	dbTrx, err := uc.DbTransaction.Begin()
 	defer func(tx DefaultLoanTransactionInterface, err *error) {
 		// recover panic
 		if r := recover(); r != nil {
@@ -94,19 +94,19 @@ func (uc UseCase) CreateLoan(
 	return nil
 }
 
-func (uc UseCase) GetLoan(
+func (uc Usecase) GetLoan(
 	ctx context.Context,
 	loanID uint,
 ) (*domians.Loan, error) {
-	return uc.loanRepo.GetLoanByID(ctx, loanID)
+	return uc.LoanRepo.GetLoanByID(ctx, loanID)
 }
 
-func (uc UseCase) ApproveLoan(
+func (uc Usecase) ApproveLoan(
 	ctx context.Context,
 	loanID, userID uint,
 	payload ApproveLoanRequest,
 ) error {
-	dbTrx, err := uc.dbTransaction.Begin()
+	dbTrx, err := uc.DbTransaction.Begin()
 	defer func(tx DefaultLoanTransactionInterface, err *error) {
 		// recover panic
 		if r := recover(); r != nil {
@@ -119,7 +119,7 @@ func (uc UseCase) ApproveLoan(
 		}
 	}(dbTrx, &err)
 
-	loan, err := uc.loanRepo.GetLoanByID(ctx, loanID)
+	loan, err := uc.LoanRepo.GetLoanByID(ctx, loanID)
 	if err != nil {
 		return constant.LoanNotFound
 	}
@@ -171,26 +171,15 @@ func (uc UseCase) ApproveLoan(
 	return nil
 }
 
-func (uc UseCase) StoreInvest(
+func (uc Usecase) StoreInvest(
 	ctx context.Context,
 	loanID, userID uint,
 	payload InvestLoanRequest,
 ) error {
-	dbTrx, err := uc.dbTransaction.Begin()
+	dbTrx, err := uc.DbTransaction.Begin()
 	nextState := ""
-	defer func(tx DefaultLoanTransactionInterface, err *error) {
-		// recover panic
-		if r := recover(); r != nil {
-			// TODO: catch error and pass to log/sentry soon
-		}
-		// end transaction (rollback or commit)
-		errTrx := tx.End(*err)
-		if errTrx != nil {
-			// TODO: catch error and pass to log/sentry soon
-		}
-	}(dbTrx, &err)
 
-	loan, err := uc.loanRepo.GetLoanByID(ctx, loanID)
+	loan, err := uc.LoanRepo.GetLoanByID(ctx, loanID)
 	if err != nil {
 		return constant.LoanNotFound
 	}
@@ -205,6 +194,18 @@ func (uc UseCase) StoreInvest(
 		loan.State = constant.Invested
 		nextState = constant.Invested
 	}
+
+	defer func(tx DefaultLoanTransactionInterface, err *error) {
+		// recover panic
+		if r := recover(); r != nil {
+
+		}
+		// end transaction (rollback or commit)
+		errTrx := tx.End(*err)
+		if errTrx != nil {
+		}
+	}(dbTrx, &err)
+
 	err = dbTrx.UpdateLoan(
 		ctx,
 		&domians.Loan{
@@ -250,16 +251,25 @@ func (uc UseCase) StoreInvest(
 	return nil
 }
 
-func (uc UseCase) DisburseLoan(
+func (uc Usecase) DisburseLoan(
 	ctx context.Context,
 	loanID, userID uint,
 	payload DisburseLoanRequest,
 ) error {
-	dbTrx, err := uc.dbTransaction.Begin()
+	dbTrx, err := uc.DbTransaction.Begin()
+
+	loan, err := uc.LoanRepo.GetLoanByID(ctx, loanID)
+	if err != nil {
+		return constant.LoanNotFound
+	}
+	if loan.State != constant.Invested {
+		return constant.ErrStateDisburse
+	}
+
 	defer func(tx DefaultLoanTransactionInterface, err *error) {
 		// recover panic
 		if r := recover(); r != nil {
-			// TODO: catch error and pass to log/sentry soon
+
 		}
 		// end transaction (rollback or commit)
 		errTrx := tx.End(*err)
@@ -267,13 +277,7 @@ func (uc UseCase) DisburseLoan(
 			// TODO: catch error and pass to log/sentry soon
 		}
 	}(dbTrx, &err)
-	loan, err := uc.loanRepo.GetLoanByID(ctx, loanID)
-	if err != nil {
-		return constant.LoanNotFound
-	}
-	if loan.State != constant.Invested {
-		return constant.ErrStateDisburse
-	}
+
 	err = dbTrx.UpdateLoan(
 		ctx,
 		&domians.Loan{
@@ -317,9 +321,9 @@ func (uc UseCase) DisburseLoan(
 	return nil
 }
 
-func (uc UseCase) GetLoans(
+func (uc Usecase) GetLoans(
 	ctx context.Context,
 	query dto.GetListQuery,
 ) ([]domians.Loan, int64, error) {
-	return uc.loanRepo.GetLoans(ctx, query)
+	return uc.LoanRepo.GetLoans(ctx, query)
 }
